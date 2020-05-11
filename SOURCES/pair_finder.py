@@ -12,7 +12,20 @@ def get_pairs(basket):
 
 def TriangularMatrixOfPairsCounters(movies_df, user_baskets):
     movies_df_size = len(movies_df)
-    traingulare_matrix = init_triangular_matrix(movies_df_size)
+    triangular_matrix = init_triangular_matrix(movies_df_size)
+
+    for i,b in enumerate(user_baskets):
+        combos = get_pairs(b)
+        print("User: ", i + 1, "/ 100")
+        for c in combos:
+            x = movies_df[movies_df['movieId'] == c[0]].index[0] - 1
+            y = movies_df[movies_df['movieId'] == c[1]].index[0]
+            #print("Pair: ", c, "Index: ", x, y)
+            #print(triangular_matrix[x][y])
+            triangular_matrix[x][y] += 1
+    
+    return triangular_matrix
+
 
 
 def init_triangular_matrix(movies_df_size):
@@ -22,6 +35,7 @@ def init_triangular_matrix(movies_df_size):
         tmp = []
 
         for y in range(x):
-            tmp.append((x,y))
-
+            tmp.append(0)
+        #print(tmp)
         triangular_matrix.append(tmp)
+    return triangular_matrix
