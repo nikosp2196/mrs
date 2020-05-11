@@ -39,3 +39,22 @@ def init_triangular_matrix(movies_df_size):
         #print(tmp)
         triangular_matrix.append(tmp)
     return triangular_matrix
+
+
+def HashCountersOfPairs(user_baskets):
+    pair_dict = {}
+
+    for b in user_baskets:
+        combos = get_pairs(b)
+        
+        for c in combos:
+            combo_key = str(c[0]) + "," + str(c[1])
+
+            if combo_key not in pair_dict.keys():
+                pair_dict[combo_key] = 1
+            else:
+                pair_dict[combo_key] += 1
+
+    return pair_dict
+            
+        
