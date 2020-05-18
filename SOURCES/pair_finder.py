@@ -11,34 +11,32 @@ def get_pairs(basket):
 
 
 def TriangularMatrixOfPairsCounters(movies_df, user_baskets):
-    movies_df_size = len(movies_df)
-    triangular_matrix = init_triangular_matrix(movies_df_size)
+    n = len(movies_df)
+    tm_size = int(n * (n - 1) / 2)
+    triangular_matrix = [0] * tm_size
 
     for i,b in enumerate(user_baskets):
-        combos = get_pairs(b)
+        b_combos = get_pairs(b)
         print("User: ", i + 1, "/ 100")
-        for c in combos:
+        for c in b_combos:
             x = movies_df[movies_df['movieId'] == c[0]].index[0] - 1
             y = movies_df[movies_df['movieId'] == c[1]].index[0]
-            #print("Pair: ", c, "Index: ", x, y)
-            #print(triangular_matrix[x][y])
-            triangular_matrix[x][y] += 1
+            
+            pos = get_tm_pos((x,y), n)
+            triangular_matrix[pos] += 1
     
     return triangular_matrix
 
 
-
-def init_triangular_matrix(movies_df_size):
-    triangular_matrix = []
-
-    for x in range(1,movies_df_size):
-        tmp = []
-
-        for y in range(x):
-            tmp.append(0)
-        #print(tmp)
-        triangular_matrix.append(tmp)
-    return triangular_matrix
+def get_tm_pos(pair,n):
+    if pair[0] < pair[1]:
+        i = pair[0]
+        j = pair[1]
+    else:
+        i = pair[1]
+        j = pair[0]
+    # This formula
+    return int(i * (n - (i + 1) / 2) + j - i -1 )
 
 
 def HashCountersOfPairs(user_baskets):

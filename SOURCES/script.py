@@ -12,7 +12,7 @@ MinScore = 4.5 # CHANGE THIS TO USER INPUT
                  
 
 
-UserBaskets,movies_list = CreateMovieBaskets(ratings_path,MinScore)
+UserBaskets,movies_list = CreateMovieBaskets(ratings_path,MinScore, 10)
 movies_df = ReadMovies(movies_path)
 
 # Keep only the movies that we've found in our baskets and reset the index
@@ -26,7 +26,13 @@ ub = [
     [0,1,3],
     [1,3,4]
 ]
+
+tm = TriangularMatrixOfPairsCounters(movies_df, UserBaskets)
+for i in  range(20):
+    print(tm[i])
+print(sum(tm))
+'''
 hash_pair_counters = HashCountersOfPairs(ub)
 for i in hash_pair_counters.keys():
-    print("Pair: ", i, "Counter: ", hash_pair_counters[i])
+    print("Pair: ", i, "Counter: ", hash_pair_counters[i])'''
 print("--- %s seconds ---" % (time.time() - start_time))

@@ -2,7 +2,7 @@ import pandas as pd
 import csv
 
 
-def CreateMovieBaskets(r_path, MinScore):
+def CreateMovieBaskets(r_path, MinScore, limit):
     userBaskets = []
     movies = []
     with open(r_path) as infile:
@@ -20,6 +20,9 @@ def CreateMovieBaskets(r_path, MinScore):
             if rating >= MinScore:
                 userBaskets[-1].append(movieId)
                 movies.append(movieId)
+            
+            if len(userBaskets) == limit:
+                break
         
         return userBaskets, list(set(movies))
 
