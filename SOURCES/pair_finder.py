@@ -3,7 +3,7 @@ def get_pairs(basket):
 
     for x in range(1,len(basket)):
         for y in range(x):
-            pair_list.append((basket[x], basket[y]))
+            pair_list.append(f"{basket[x]},{basket[y]}")
 
     return pair_list
 
