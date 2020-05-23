@@ -3,7 +3,7 @@ def get_pairs(basket):
 
     for x in range(1,len(basket)):
         for y in range(x):
-            pair_list.append(f"{basket[x]},{basket[y]}")
+            pair_list.append(str(basket[x]) + "," + str(basket[y]))
 
     return pair_list
 
@@ -27,9 +27,12 @@ def TriangularMatrixOfPairsCounters(movies_df, user_baskets):
         b_combos = get_pairs(b)
         print("User: ", i + 1, "/ 100")
         for c in b_combos:
+            tmp = c.split(",")
+            tmp_x = int(tmp[0])
+            tmp_y = int(tmp[1])
             # Turn movieId to index
-            x = movies_df[movies_df['movieId'] == c[0]].index[0]
-            y = movies_df[movies_df['movieId'] == c[1]].index[0]
+            x = movies_df[movies_df['movieId'] == tmp_x].index[0]
+            y = movies_df[movies_df['movieId'] == tmp_y].index[0]
             
             pos = get_tm_pos((x,y), n)
             triangular_matrix[pos] += 1
@@ -55,12 +58,12 @@ def HashCountersOfPairs(movies_df, user_baskets):
         combos = get_pairs(b)
         print("User: ", i + 1, "/ 100")
         for c in combos:
-            combo_key = f"({c[0]},{c[1]})"
+            #combo_key = f"({c[0]},{c[1]})"
 
-            if combo_key not in pair_dict.keys():
-                pair_dict[combo_key] = 1
+            if c not in pair_dict.keys():
+                pair_dict[c] = 1
             else:
-                pair_dict[combo_key] += 1
+                pair_dict[c] += 1
 
     return pair_dict
             
