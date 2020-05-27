@@ -120,7 +120,7 @@ def get_combos(ub, L, k):
     combo_list = []
 
     for i_b, basket in enumerate(ub): # Iterate the baskets
-        print("k:", k,"User: ", i_b + 1, "/ 100")
+        print("k:", k,"User: ", i_b + 1, "/",len(ub))
         combo_list.append([])
         if len(basket) >= k: # Baskets with size less than k can't have k-combo
 
