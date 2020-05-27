@@ -27,9 +27,20 @@ def CreateMovieBaskets(r_path, MinScore, limit):
         return userBaskets, list(set(movies))
 
 
-def ReadMovies(m_path):
-    movies_df = pd.read_csv(m_path)
-    movies_df['genres'] = [i.split(sep="|") for i in movies_df['genres']]
-    #print(movies_df.head())
+def createRatingsStream(r_path, MinScore):
+    ratings_stream = pd.read_csv(r_path)
+    ratings_stream = ratings_stream.drop('timestamp', axis='columns') 
+    ratings_stream = ratings_stream[ratings_stream['rating'] >= MinScore]
+    ratings_stream = ratings_stream.reset_index(drop=True)
 
+    return ratings_stream
+
+
+
+def ReadMovies(m_path, movie_list):
+    movies_df = pd.read_csv(m_path)
+    #movies_df['genres'] = [i.split(sep="|") for i in movies_df['genres']]
+    
+    movies_df = movies_df[movies_df['movieId'].isin(movie_list)].reset_index(drop=True)
+    
     return movies_df
