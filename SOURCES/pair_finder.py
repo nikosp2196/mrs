@@ -77,7 +77,8 @@ def myApriori(itemBaskets, min_frequency, max_length):
     L[1] = frequency_filter(min_frequency,C1)
     pairs = []
     for i in itemBaskets:
-        pairs.append(get_pairs(i))
+
+        pairs.append(get_pairs(sorted(i)))
     C2 = calculate_frequencies(pairs, len(itemBaskets))
     L[2] = frequency_filter(min_frequency, C2)
     
@@ -95,7 +96,8 @@ def calculate_frequencies(object_list, N):
     vector_dict = {}
 
     for b_i in range(len(object_list)):
-        for c in object_list[b_i]: # c -> combo
+        for c_i in object_list[b_i]: # c -> combo
+            c = str(c_i)
             if c not in vector_dict.keys():
                 vector_dict[c] = {"frequency": 1, "baskets" : [b_i]}
             else:
@@ -120,7 +122,7 @@ def get_combos(ub, L, k):
     combo_list = []
 
     for i_b, basket in enumerate(ub): # Iterate the baskets
-        print("k:", k,"User: ", i_b + 1, "/",len(ub))
+        print("k:", k,"User: ", i_b + 1, "/", len(ub))
         combo_list.append([])
         if len(basket) >= k: # Baskets with size less than k can't have k-combo
 
