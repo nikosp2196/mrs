@@ -18,7 +18,7 @@ def get_pairs(basket):
 def TriangularMatrixOfPairsCounters(movies_df, user_baskets):
     n = len(movies_df)
     tm_size = int(n * (n - 1) / 2)
-    
+
     # Initialize lower triangular matrix counters
     triangular_matrix = [0] * tm_size 
 
@@ -70,19 +70,23 @@ def HashCountersOfPairs(user_baskets):
 
 def myApriori(itemBaskets, min_frequency, max_length):
     L = {}
-    C1 = calculate_frequencies(itemBaskets ,len(itemBaskets))
+    n_baskets = len(itemBaskets)
+
+    C1 = calculate_frequencies(itemBaskets, n_baskets)
     L[1] = frequency_filter(min_frequency,C1)
+    
     pairs = []
     for i in itemBaskets:
-
         pairs.append(get_pairs(sorted(i)))
-    C2 = calculate_frequencies(pairs, len(itemBaskets))
+
+    C2 = calculate_frequencies(pairs, n_baskets)
     L[2] = frequency_filter(min_frequency, C2)
     
     for i in range(3,max_length + 1):
         tmp_combos = get_combos(itemBaskets, L, i)
-        Ci = calculate_frequencies(tmp_combos, len(itemBaskets))
+        Ci = calculate_frequencies(tmp_combos, n_baskets)
         L[i] = frequency_filter(min_frequency, Ci)
+        
         if len(L[i].keys()) == 0:
             break
 
@@ -93,8 +97,7 @@ def calculate_frequencies(object_list, N):
     vector_dict = {}
 
     for b_i in range(len(object_list)):
-        for c_i in object_list[b_i]: # c -> combo
-            c = str(c_i)
+        for c in object_list[b_i]: # c -> combo
             if c not in vector_dict.keys():
                 vector_dict[c] = {"frequency": 1, "baskets" : [b_i]}
             else:
@@ -127,27 +130,22 @@ def get_combos(ub, L, k):
 
                 if i in list(L[1]): # If the object not in L1, it isn't frequent
                     
-                    for j in list(L[k-1]): # Iterate the L_k-1 dict which holds the frequenct k-1 combos
-                        previous_combo_elements = j.split(",")
-                        str_i = str(i)
-                        if i_b in L[k-1][j]['baskets'] and str_i not in previous_combo_elements:
-                            combo_list[-1].append(create_new_combo(str_i,previous_combo_elements))
+                    for previous_combo in list(L[k-1]): # Iterate the L_k-1 dict which holds the frequenct k-1 combos
+
+                        if i_b in L[k-1][previous_combo]['baskets'] and i not in previous_combo:
+                            combo_list[-1].append(create_new_combo(i,previous_combo))
                         
-            combo_list[-1] = list(dict.fromkeys(combo_list[-1]))
+            combo_list[-1] = list(set(combo_list[-1]))
             
     return combo_list
                         
 
 def create_new_combo(new_object, old_combo):
-    #combo_objects = old_combo.split(",")
-    old_combo.append(new_object)
-    final_combo = ""
-    combo_to_int = [int(i) for i in old_combo]
-    sorted_combo = sorted(combo_to_int, reverse=True)
-    for i in sorted_combo:
-        final_combo += str(i) + ","
-
-    return final_combo[:-1] 
+    combo_list = list(old_combo)
+    combo_list.append(new_object)
+    sorted_combo = sorted(combo_list, reverse=True)
+    
+    return tuple(sorted_combo) 
 
 
 ###################
@@ -155,14 +153,27 @@ def create_new_combo(new_object, old_combo):
 ###################
 
 def sampledApriori(sample_size, ratings_stream, min_frequency, max_length):
+    combos_1, key_stopped = run_apriori(sample_size, ratings_stream, min_frequency, max_length, key_enabled=True)
+    
+    if key_stopped:
+        return combos_1
+    
+    combos_2, key_stopped = run_apriori(sample_size, ratings_stream, min_frequency, max_length)
+    
+    return [c1 for c1 in combos_1 if c1 in combos_2]
+
+
+def run_apriori(sample_size, ratings_stream, min_frequency, max_length, key_enabled=False):
     SetOfUsers = [] # User so far
     sampleOfBaskets = {} # Key: userId, Value: movie_basket
     sample_map = [] # Mapping between sample index and userId
+
+    key_pressed = False
     for i in range(len(ratings_stream)):
 
-        if keyboard.is_pressed('y') or keyboard.is_pressed('Y'):
-            combos_1 = list(myApriori(sampleOfBaskets.values, min_frequency, max_length).keys())
-            return combos_1
+        if key_enabled and (keyboard.is_pressed('y') or keyboard.is_pressed('Y')) and i > len(ratings_stream):
+            key_pressed = True
+            break
         else:
             current_assessment = ratings_stream.iloc[i]
             current_user = int(current_assessment['userId'])
@@ -175,38 +186,12 @@ def sampledApriori(sample_size, ratings_stream, min_frequency, max_length):
             if current_user in sampleOfBaskets.keys():
                 sampleOfBaskets[current_user].append(current_movie)
     
-    # do first apriori here
-    #return sampleOfBaskets.values()
-    combos_dict_1 = myApriori(list(sampleOfBaskets.values()), min_frequency, max_length)
-    combos_1 = []
-    for i in combos_dict_1.keys():
-        for j in combos_dict_1[i].keys():
-            combos_1.append(j)
+    combos_dict = myApriori(list(sampleOfBaskets.values()), min_frequency, max_length)
+    combos = export_combos(combos_dict)
 
 
-    SetOfUsers = []
-    sampleOfBaskets = {}
-    sample_map = [] 
-    # Second run
-    for i in range(len(ratings_stream)):
-        current_assessment = ratings_stream.iloc[i]
-        current_user = int(current_assessment['userId'])
-        current_movie = int(current_assessment['movieId'])
+    return combos, key_pressed
 
-        if current_user not in SetOfUsers:
-            SetOfUsers.append(current_user)
-            sampleOfBaskets = reservoir_sampling(len(SetOfUsers), sample_size, sampleOfBaskets, sample_map, current_user)
-
-        if current_user in sampleOfBaskets.keys():
-            sampleOfBaskets[current_user].append(current_movie)
-    combos_dict_2 = myApriori(list(sampleOfBaskets.values()), min_frequency, max_length)
-    combos_2 = []
-    for i in combos_dict_2.keys():
-        for j in combos_dict_2[i].keys():
-            combos_2.append(j)
-
-    #return combos_dict_1, combos_dict_2
-    return [c1 for c1 in combos_1 if c1 in combos_2]
 
 def reservoir_sampling(n_distinct_users, sample_size, sample_of_baskets, sample_map, current_user):
     seed()
@@ -222,5 +207,12 @@ def reservoir_sampling(n_distinct_users, sample_size, sample_of_baskets, sample_
             del sample_of_baskets[old_user]
             sample_of_baskets[current_user] = []
             
-
     return sample_of_baskets
+
+
+def export_combos(combos_dict):
+    combos = []
+    for i in combos_dict.keys():
+        for j in combos_dict[i].keys():
+            combos.append(j)
+    return combos
