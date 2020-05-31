@@ -1,6 +1,5 @@
 
 import time
-from random import seed
 import keyboard
 from random import seed
 from random import randint
@@ -10,7 +9,7 @@ def get_pairs(basket):
 
     for x in range(1,len(basket)):
         for y in range(x):
-            pair_list.append((basket[x], basket[y]))
+            pair_list.append(frozenset([basket[x], basket[y]]))
 
     return pair_list
 
@@ -55,8 +54,7 @@ def HashCountersOfPairs(user_baskets):
         combos = get_pairs(b)
         print("User: ", i + 1, "/ 100")
         for c in combos:
-            #combo_key = f"({c[0]},{c[1]})"
-
+            
             if c not in pair_dict.keys():
                 pair_dict[c] = 1
             else:
@@ -72,23 +70,24 @@ def myApriori(itemBaskets, min_frequency, max_length):
     L = {}
     n_baskets = len(itemBaskets)
 
-    C1 = calculate_frequencies(itemBaskets, n_baskets)
-    L[1] = frequency_filter(min_frequency,C1)
-    
+    L[1] = calculate_frequencies(itemBaskets, n_baskets)
+    frequency_filter(min_frequency,L[1])
+    print(1,"--------------------->",len(L[1].keys()))
     pairs = []
     for i in itemBaskets:
         pairs.append(get_pairs(sorted(i)))
 
-    C2 = calculate_frequencies(pairs, n_baskets)
-    L[2] = frequency_filter(min_frequency, C2)
+    L[2] = calculate_frequencies(pairs, n_baskets)
+    frequency_filter(min_frequency, L[2])
+    print(2,"--------------------->",len(L[2].keys()))
     
-    for i in range(3,max_length + 1):
+    i = 3
+    while i <= max_length and len(L[i-1].keys()) != 0:
         tmp_combos = get_combos(itemBaskets, L, i)
-        Ci = calculate_frequencies(tmp_combos, n_baskets)
-        L[i] = frequency_filter(min_frequency, Ci)
-        
-        if len(L[i].keys()) == 0:
-            break
+        L[i] = calculate_frequencies(tmp_combos, n_baskets)
+        frequency_filter(min_frequency, L[i])
+        print(i,"--------------------->",len(L[i].keys()))
+        i += 1
 
     return L
 
@@ -97,7 +96,13 @@ def calculate_frequencies(object_list, N):
     vector_dict = {}
 
     for b_i in range(len(object_list)):
-        for c in object_list[b_i]: # c -> combo
+        for ce in object_list[b_i]:
+            
+            if type(ce) == int:
+                c = frozenset([ce])
+            else:
+                c = ce
+
             if c not in vector_dict.keys():
                 vector_dict[c] = {"frequency": 1, "baskets" : [b_i]}
             else:
@@ -114,38 +119,40 @@ def frequency_filter(min_frequency, input_dict):
     for i in list(input_dict):
         if input_dict[i]['frequency'] < min_frequency:
             del input_dict[i]
-    
-    return input_dict
+
 
 
 def get_combos(ub, L, k):
     combo_list = []
 
     for i_b, basket in enumerate(ub): # Iterate the baskets
-        print("k:", k,"User: ", i_b + 1, "/", len(ub))
-        combo_list.append([])
+        #print("k:", k,"User: ", i_b + 1, "/", len(ub))
+        combo_list.append(set())
         if len(basket) >= k: # Baskets with size less than k can't have k-combo
 
             for i in basket: # Iterate the objects in the basket
-
-                if i in list(L[1]): # If the object not in L1, it isn't frequent
-                    
+                i_set = {i}
+                if i_set in list(L[1]): # If the object not in L1, it isn't frequent
+                    #print("L[1] check!")
                     for previous_combo in list(L[k-1]): # Iterate the L_k-1 dict which holds the frequenct k-1 combos
-
+                        # i_b: index of user_basket
+                        # previous_combo: key of the L[k-1]
                         if i_b in L[k-1][previous_combo]['baskets'] and i not in previous_combo:
-                            combo_list[-1].append(create_new_combo(i,previous_combo))
+                            #print("COMBO GENERATOR check!")
+                            # combo_list[-1].add(create_new_combo(i,previous_combo))
+                            combo_list[-1].add(previous_combo.union(i_set))
                         
-            combo_list[-1] = list(set(combo_list[-1]))
+            #combo_list[-1] = list(set(combo_list[-1]))
             
     return combo_list
                         
 
-def create_new_combo(new_object, old_combo):
+'''def create_new_combo(new_object, old_combo):
     combo_list = list(old_combo)
     combo_list.append(new_object)
     sorted_combo = sorted(combo_list, reverse=True)
     
-    return tuple(sorted_combo) 
+    return tuple(sorted_combo) '''
 
 
 ###################
@@ -181,7 +188,8 @@ def run_apriori(sample_size, ratings_stream, min_frequency, max_length, key_enab
 
             if current_user not in SetOfUsers:
                 SetOfUsers.append(current_user)
-                sampleOfBaskets = reservoir_sampling(len(SetOfUsers), sample_size, sampleOfBaskets, sample_map, current_user)
+                #sampleOfBaskets, sample_map = 
+                reservoir_sampling(len(SetOfUsers), sample_size, sampleOfBaskets, sample_map, current_user)
 
             if current_user in sampleOfBaskets.keys():
                 sampleOfBaskets[current_user].append(current_movie)
@@ -207,7 +215,7 @@ def reservoir_sampling(n_distinct_users, sample_size, sample_of_baskets, sample_
             del sample_of_baskets[old_user]
             sample_of_baskets[current_user] = []
             
-    return sample_of_baskets
+    #return sample_of_baskets, sample_map
 
 
 def export_combos(combos_dict):
@@ -216,3 +224,36 @@ def export_combos(combos_dict):
         for j in combos_dict[i].keys():
             combos.append(j)
     return combos
+
+###########
+# SCORING #
+###########
+
+def get_scores(classic_apriori, sampled_apriori):
+    tp = []
+    fp = []
+    fn = []
+    for i in classic_apriori:
+        if i in sampled_apriori:
+            tp.append(i)
+        else:
+            fn.append(i)
+    for i in sampled_apriori:
+        if i not in classic_apriori:
+            fp.append(i)
+    tp = len(tp)
+    fp = len(fp)
+    fn = len(fn)
+    precision = tp / (tp + fp)
+    recall = tp / (tp + fn)
+    f1 = 2 * (precision * recall) / (precision + recall)
+
+    results = {
+        "tp" : tp,
+        "fp" : fp,
+        "fn" : fn,
+        "precision" : precision,
+        "recall" : recall,
+        "f1" : f1
+    }
+    return results
