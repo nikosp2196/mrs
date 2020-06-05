@@ -160,25 +160,37 @@ def get_combos(ub, L, k):
 ###################
 
 def sampledApriori(sample_size, ratings_stream, min_frequency, max_length):
+    print("========FIRST EXECUTION OF SAMPLED APRIORI========")
     combos_1, key_stopped = run_apriori(sample_size, ratings_stream, min_frequency, max_length, key_enabled=True)
     
     if key_stopped:
         return combos_1
     
+    print("========SECOND EXECUTION OF SAMPLED APRIORI=======")
     combos_2, key_stopped = run_apriori(sample_size, ratings_stream, min_frequency, max_length)
+    fp_counter = 0
+    for l in range(1,max_length):
+        l_combos = list(combos_1[l].keys())
+        for i in l_combos:
+            if i not in combos_2[l].keys():
+                del combos_1[l][i]
+                fp_counter += 1
+    print(f"*** {fp_counter} false-positives were removed in the second execution.")
     
-    return [c1 for c1 in combos_1 if c1 in combos_2]
+    return combos_1
 
 
 def run_apriori(sample_size, ratings_stream, min_frequency, max_length, key_enabled=False):
     SetOfUsers = [] # User so far
     sampleOfBaskets = {} # Key: userId, Value: movie_basket
     sample_map = [] # Mapping between sample index and userId
+    stream_size = len(ratings_stream)
 
     key_pressed = False
-    for i in range(len(ratings_stream)):
-
-        if key_enabled and (keyboard.is_pressed('y') or keyboard.is_pressed('Y')) and i > len(ratings_stream):
+    for i in range(stream_size):
+        print(f'Reading rating {i} / {stream_size}', end='\r')
+        
+        if key_enabled and (keyboard.is_pressed('y') or keyboard.is_pressed('Y')) and len(sampleOfBaskets) == sample_size:
             key_pressed = True
             break
         else:
@@ -194,8 +206,8 @@ def run_apriori(sample_size, ratings_stream, min_frequency, max_length, key_enab
             if current_user in sampleOfBaskets.keys():
                 sampleOfBaskets[current_user].append(current_movie)
     
-    combos_dict = myApriori(list(sampleOfBaskets.values()), min_frequency, max_length)
-    combos = export_combos(combos_dict)
+    combos = myApriori(list(sampleOfBaskets.values()), min_frequency, max_length)
+    #combos = export_combos(combos_dict)
 
 
     return combos, key_pressed
