@@ -257,3 +257,88 @@ def get_scores(classic_apriori, sampled_apriori):
         "f1" : f1
     }
     return results
+
+#########
+# RULES #
+#########
+
+def generate_rules(input_dict):
+
+    MinConfidence = input_dict['MinConfidence']
+    current_h = input_dict['current_hypothesis']
+    final_h = input_dict['final_hypothesis']
+    itemset_fs = input_dict['itemset']
+    itemset_l = sorted(list(itemset_fs))
+    set_size = len(itemset_l)
+    h_size = len(current_h)
+    c_size = set_size - h_size
+    while True:
+        h = frozenset([itemset_l[i] for i in current_h])
+        c = itemset_fs.difference(h)
+        if h not in input_dict['h_set'] and c not in input_dict['ban_set']:
+            i_f = input_dict['collection'][set_size][itemset_fs]['frequency']
+            h_f = input_dict['collection'][h_size][h]['frequency']
+            c_f = input_dict['collection'][c_size][c]['frequency']
+            confidence = get_confidence(i_f, h_f)
+            
+            if confidence >= MinConfidence:
+                #print(input_dict['rule_id'])
+                # Append
+                h_sl = sorted(list(h))
+                c_sl = sorted(list(c))
+                tmp_rule = {
+                    'itemset': itemset_l,
+                    'rule': f"{h_sl}-->{c_sl}",
+                    'hypothesis': h_sl,
+                    'conclusion': c_sl,
+                    'frequency': i_f,
+                    'confidence': confidence,
+                    'lift': get_lift(i_f, c_f),
+                    'interest': get_interest(i_f, c_f),
+                    'rule_id': input_dict['rule_id']
+                }
+
+                input_dict['rules'].append(tmp_rule)
+                input_dict['h_set'].add(h)
+                input_dict['rule_id'] += 1
+                
+                if len(current_h) > 1:
+                    # Generate rules with smaller hypothesis
+                    input_dict['current_hypothesis'] = current_h[:-1]
+                    input_dict['final_hypothesis'] = current_h[1:]
+                    generate_rules(input_dict)
+            else:
+                input_dict['ban_set'].add(c)
+        
+        if next_hypothesis(current_h, final_h) == -1:
+            break
+
+
+def next_hypothesis(current, final):
+    h_size = len(current)
+    pointer = h_size - 1
+    if current == final:
+        #print("Already at final hypothesis!!")
+        return -1
+    #print(h_size)
+    while True:
+        if current[pointer] != final[pointer]:
+        
+            current[pointer] += 1
+            for i in range(pointer + 1, h_size):
+                current[i] = current[i-1] + 1
+            break
+        else:
+            pointer -= 1
+
+
+def get_confidence(itemset_f, hypothesis_f):
+    return itemset_f / hypothesis_f
+
+
+def get_lift(rule_confidence, conclusion_f):
+    return rule_confidence / conclusion_f
+
+
+def get_interest(rule_confidence, conclusion_f):
+    return rule_confidence - conclusion_f
