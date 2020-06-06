@@ -110,7 +110,10 @@ def presentation_menu(combos, movies_df):
 
 def execute_command(command, combos, movies_df):
     options_list = command.split(',')
-    
+    command_id = options_list[0]
+
+    if command_id == 'a':
+        
 
 
 def menu():
