@@ -3,6 +3,7 @@ import time
 import keyboard
 from random import seed
 from random import randint
+import pandas as pd
 
 def get_pairs(basket):
     pair_list = []
@@ -189,7 +190,7 @@ def run_apriori(sample_size, ratings_stream, min_frequency, max_length, key_enab
     key_pressed = False
     for i in range(stream_size):
         print(f'Reading rating {i} / {stream_size}', end='\r')
-        
+
         if key_enabled and (keyboard.is_pressed('y') or keyboard.is_pressed('Y')) and len(sampleOfBaskets) == sample_size:
             key_pressed = True
             break
@@ -274,9 +275,43 @@ def get_scores(classic_apriori, sampled_apriori):
 # RULES #
 #########
 
+def rule_generator(combos, min_confidence, min_lift, max_lift):
+    MaxCombo = max(combos.keys())
+
+    input_dict = {
+            'MinConfidence': min_confidence,
+            'MinLift': min_lift,
+            'MaxLift': max_lift,
+            'collection': combos,
+            'rule_id': 1,
+            'rules': []
+        }
+
+    for i in range(2, MaxCombo):    
+        combo_size = i
+        final_hypothesis =  list(range(1,combo_size))
+        current_hypothesis = list(range(combo_size - 1))
+
+    for c in combos[i]:
+        
+        input_dict['current_hypothesis'] = current_hypothesis
+        input_dict['final_hypothesis'] = final_hypothesis
+        input_dict['ban_set'] = set()
+        input_dict['h_set'] = set()
+        input_dict['itemset'] = c
+
+        generate_rules(input_dict)
+
+
+    rules = pd.DataFrame(input_dict['rules'])
+
+    return rules
+
 def generate_rules(input_dict):
 
     MinConfidence = input_dict['MinConfidence']
+    MinLift = input_dict['MinLift']
+    MaxLift = input_dict['MaxLift']
     current_h = input_dict['current_hypothesis']
     final_h = input_dict['final_hypothesis']
     itemset_fs = input_dict['itemset']
@@ -292,8 +327,11 @@ def generate_rules(input_dict):
             h_f = input_dict['collection'][h_size][h]['frequency']
             c_f = input_dict['collection'][c_size][c]['frequency']
             confidence = get_confidence(i_f, h_f)
+            lift = get_lift(i_f, c_f)
             
-            if confidence >= MinConfidence:
+            if confidence >= MinConfidence and \
+            (lift >= MinLift or MinLift == -1) and \
+            (lift <= MaxLift or MaxLift == -1):
                 #print(input_dict['rule_id'])
                 # Append
                 h_sl = sorted(list(h))
@@ -305,7 +343,7 @@ def generate_rules(input_dict):
                     'conclusion': c_sl,
                     'frequency': i_f,
                     'confidence': confidence,
-                    'lift': get_lift(i_f, c_f),
+                    'lift': lift,
                     'interest': get_interest(i_f, c_f),
                     'rule_id': input_dict['rule_id']
                 }

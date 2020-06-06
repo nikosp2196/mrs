@@ -2,7 +2,7 @@ import pandas as pd
 import csv
 
 
-def CreateMovieBaskets(r_path, MinScore, limit):
+def CreateMovieBaskets(r_path, MinScore):
     userBaskets = []
     movies = []
     with open(r_path) as infile:
@@ -21,10 +21,10 @@ def CreateMovieBaskets(r_path, MinScore, limit):
                 userBaskets[-1].append(movieId)
                 movies.append(movieId)
             
-            if len(userBaskets) == limit:
-                break
+            #if len(userBaskets) == limit:
+            #    break
         
-        return userBaskets, list(set(movies))
+        return userBaskets#, list(set(movies))
 
 
 def createRatingsStream(r_path, MinScore):
@@ -37,10 +37,10 @@ def createRatingsStream(r_path, MinScore):
 
 
 
-def ReadMovies(m_path, movie_list):
+def ReadMovies(m_path):
     movies_df = pd.read_csv(m_path)
     #movies_df['genres'] = [i.split(sep="|") for i in movies_df['genres']]
     
-    movies_df = movies_df[movies_df['movieId'].isin(movie_list)].reset_index(drop=True)
+    #movies_df = movies_df[movies_df['movieId'].isin(movie_list)].reset_index(drop=True)
     
     return movies_df
