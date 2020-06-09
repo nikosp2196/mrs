@@ -275,7 +275,7 @@ def get_scores(classic_apriori, sampled_apriori):
 # RULES #
 #########
 
-def rule_generator(combos, min_confidence, min_lift, max_lift):
+def generate_all_rules(combos, min_confidence, min_lift, max_lift):
     MaxCombo = max(combos.keys())
 
     input_dict = {
@@ -300,14 +300,14 @@ def rule_generator(combos, min_confidence, min_lift, max_lift):
         input_dict['h_set'] = set()
         input_dict['itemset'] = c
 
-        generate_rules(input_dict)
+        generate_rules_from_itemset(input_dict)
 
 
     rules = pd.DataFrame(input_dict['rules'])
 
     return rules
 
-def generate_rules(input_dict):
+def generate_rules_from_itemset(input_dict):
 
     MinConfidence = input_dict['MinConfidence']
     MinLift = input_dict['MinLift']
@@ -356,7 +356,7 @@ def generate_rules(input_dict):
                     # Generate rules with smaller hypothesis
                     input_dict['current_hypothesis'] = current_h[:-1]
                     input_dict['final_hypothesis'] = current_h[1:]
-                    generate_rules(input_dict)
+                    generate_rules_from_itemset(input_dict)
             else:
                 input_dict['ban_set'].add(c)
         
