@@ -292,15 +292,15 @@ def generate_all_rules(combos, min_confidence, min_lift, max_lift):
         final_hypothesis =  list(range(1,combo_size))
         current_hypothesis = list(range(combo_size - 1))
 
-    for c in combos[i]:
-        
-        input_dict['current_hypothesis'] = current_hypothesis
-        input_dict['final_hypothesis'] = final_hypothesis
-        input_dict['ban_set'] = set()
-        input_dict['h_set'] = set()
-        input_dict['itemset'] = c
+        for c in combos[i]:
+            
+            input_dict['current_hypothesis'] = current_hypothesis
+            input_dict['final_hypothesis'] = final_hypothesis
+            input_dict['ban_set'] = set()
+            input_dict['h_set'] = set()
+            input_dict['itemset'] = c
 
-        generate_rules_from_itemset(input_dict)
+            generate_rules_from_itemset(input_dict)
 
 
     rules = pd.DataFrame(input_dict['rules'])

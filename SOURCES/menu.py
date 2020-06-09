@@ -3,7 +3,7 @@ from loader import *
 from pair_finder import *
 import time
 import pandas as pd
-from draw_rules_graph import *
+from plots import *
 
 
 def print_presentation_commands():
@@ -13,10 +13,10 @@ def print_presentation_commands():
     print('      [format:    in their <ITEMSET|HYPOTHESIS|CONCLUSION>      \
     b,<i,h,c>,<comma-sep. movie IDs>]\n')
     print('(c)   COMPARE rules with <CONFIDENCE,LIFT>          [format: c]\n')
-    print('(h)   Print the HISTOGRAM of <CONFIDENCE|LIFT>     [format: h,<c,l>]\n')
+    print('(h)   Print the HISTOGRAM of <CONFIDENCE|LIFT>      [format: h]\n')
     print('(m)   Show details of a MOVIE                       [format: m,<movie ID>]\n')
     print('(r)   Show a particular RULE                        [format: r,<rule ID>]\n')
-    print('(s)   SORT rules by increasing <CONFIDENCE|LIFT|INTEREST>\n')
+    print('(s)   SORT rules by increasing <CONFIDENCE|LIFT|INTEREST>')
     print('                                                    [format: s,<c,l,i>]')
     print('(v)   VISUALIZATION of association rules            [format: v,<draw_choice:')     
     print('      (sorted by lift)                              [c(ircular),r(andom),s(pring)]>,')
@@ -28,9 +28,6 @@ def loading_menu():
     options = ['1', '2', '3']
     print_loading_options()
     selected_option = input()
-    '''while selected_option not in options:
-        print('Please pick one of the given options:')
-        selected_option = input()'''
     
     print("Give a Min-Score(0,5):")
     min_score = float(input())
@@ -192,7 +189,9 @@ def presentation_menu(rules, movies_df):
 
         elif command_type == "h":
             # Print the histogram of <confidence|lift|interest>
-            print(command_type)
+            
+            hist_lift_confidence(rules)
+
         elif command_type == "c":
 
             # Comparison of confidence vs lift
