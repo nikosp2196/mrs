@@ -19,13 +19,13 @@ def draw_graph(rules,number_of_rules,draw_choice):
 
     NumberOfRandomColors = 100
     edge_colors_iter = np.random.rand(NumberOfRandomColors)
-
+    
 
     node_sizes = {}     # larger rule-nodes imply larger confidence
     node_colors = {}    # darker rule-nodes imply larger lift
     
     for index, row in rules.iterrows():
-
+        
         color_of_rule = edge_colors_iter[color_iter]
 
         rule = row['rule']
@@ -48,7 +48,10 @@ def draw_graph(rules,number_of_rules,draw_choice):
         for item in conclusion:
             G.add_edge("R"+str(rule_id), str(item), color=color_of_rule)
 
-        color_iter += 1 % NumberOfRandomColors
+        color_iter = (color_iter + 1) % NumberOfRandomColors
+
+        if index == number_of_rules - 1:
+            break
 
     print("\tNode size & color coding:")
     print("\t[Rule-Node Size] 4 : lift>7, 3 : lift>6, 2 : lift>5, 1 : default")
@@ -107,4 +110,15 @@ def draw_graph(rules,number_of_rules,draw_choice):
         nx.draw(G, pos, edges=edges, node_size=final_node_sizes, node_color = color_map, edge_color=colors, font_size=10, with_labels=False)
         nx.draw_networkx_labels(G, pos)    
 
+    plt.show()
+
+
+def compare_confidence_lift(rules):
+    fit = np.polyfit(rules['lift'], rules['confidence'], 1)
+    fit_fn = np.poly1d(fit) 
+    plt.plot(rules['lift'], rules['confidence'], 'yo', rules['lift'], fit_fn(rules['lift']))
+    plt.xlabel('Lift')
+    plt.ylabel('Confidence') 
+    plt.title('CONFIDENCE vs LIFT')
+    plt.tight_layout()
     plt.show()

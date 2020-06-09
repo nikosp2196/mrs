@@ -3,6 +3,8 @@ from loader import *
 from pair_finder import *
 import time
 import pandas as pd
+from draw_rules_graph import *
+
 
 def print_presentation_commands():
     print('===================================\n')
@@ -192,14 +194,26 @@ def presentation_menu(rules, movies_df):
             # Print the histogram of <confidence|lift|interest>
             print(command_type)
         elif command_type == "c":
+
             # Comparison of confidence vs lift
-            print(command_type)
+            
+            compare_confidence_lift(rules)
+        
         elif command_type == "v":
+            
             # Visualization of association rules
-            print(command_type)
+            
+            plot_option = opt_list[1]
+            number_of_rules_to_draw = int(opt_list[2])
+
+            draw_graph(rules.sort_values('lift'), number_of_rules_to_draw, plot_option)
+
         elif command_type == "e":
+            
             # Exit
+            
             return -1
+        
         else:
             print("Wrong command input. Please try again.")
         
@@ -209,7 +223,7 @@ def presentation_menu(rules, movies_df):
         if user_selection != "y":
             return -1
         
-        os.system('cls')
+        os.system('cls' if os.name == 'nt' else 'clear')
 
 
 def print_df(input_df):

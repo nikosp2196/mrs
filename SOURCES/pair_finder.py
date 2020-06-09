@@ -283,7 +283,7 @@ def generate_all_rules(combos, min_confidence, min_lift, max_lift):
             'MinLift': min_lift,
             'MaxLift': max_lift,
             'collection': combos,
-            'rule_id': 1,
+            'rule ID': 1,
             'rules': []
         }
 
@@ -327,7 +327,7 @@ def generate_rules_from_itemset(input_dict):
             h_f = input_dict['collection'][h_size][h]['frequency']
             c_f = input_dict['collection'][c_size][c]['frequency']
             confidence = get_confidence(i_f, h_f)
-            lift = get_lift(i_f, c_f)
+            lift = get_lift(confidence, c_f)
             
             if confidence >= MinConfidence and \
             (lift >= MinLift or MinLift == -1) and \
@@ -345,12 +345,12 @@ def generate_rules_from_itemset(input_dict):
                     'confidence': confidence,
                     'lift': lift,
                     'interest': get_interest(i_f, c_f),
-                    'rule_id': input_dict['rule_id']
+                    'rule ID': input_dict['rule ID']
                 }
 
                 input_dict['rules'].append(tmp_rule)
                 input_dict['h_set'].add(h)
-                input_dict['rule_id'] += 1
+                input_dict['rule ID'] += 1
                 
                 if len(current_h) > 1:
                     # Generate rules with smaller hypothesis
