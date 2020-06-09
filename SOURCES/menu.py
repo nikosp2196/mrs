@@ -217,9 +217,9 @@ def presentation_menu(rules, movies_df):
             print("Wrong command input. Please try again.")
         
         print("Would you like to continue?")
-        print('Press y to continue or anything else to exit: ')
+        print('Press e to exit or anything else to continue:')
         user_selection = input()
-        if user_selection != "y":
+        if user_selection == "e":
             return -1
         
         os.system('cls' if os.name == 'nt' else 'clear')
