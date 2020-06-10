@@ -28,23 +28,16 @@ def TriangularMatrixOfPairsCounters(movies_df, user_baskets):
         for c in b_combos:
             pos = get_tm_pos(c, movies_df)
             triangular_matrix[pos] += 1
-    
+                   
     return triangular_matrix
 
 
 def get_tm_pos(m_pair, movies_df):
     n = len(movies_df)
-    m_index_1 = movies_df[movies_df['movieId'] == m_pair[0]].index[0]
-    m_index_2 = movies_df[movies_df['movieId'] == m_pair[1]].index[0]
-    pair = (m_index_1, m_index_2)
-    if pair[0] < pair[1]:
-        i = pair[0]
-        j = pair[1]
-    else:
-        i = pair[1]
-        j = pair[0]
+    j = movies_df[movies_df['movieId'] == m_pair[0]].index[0] + 1
+    i = movies_df[movies_df['movieId'] == m_pair[1]].index[0] + 1
     # This formula
-    return int(i * (n - (i + 1) / 2) + j - i - 1)
+    return (i - 1) * (int(n - i/2)) + j - i - 1
 
 
 def HashCountersOfPairs(user_baskets):
