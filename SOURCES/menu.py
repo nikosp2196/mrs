@@ -152,7 +152,7 @@ def presentation_menu(rules, movies_df):
             else:
                 print("Sth went wrong. Try again.")
             
-            results = pd.DataFrame([rules.iloc[i] for i in range(len(rules)) if bag_of_movies <= set(rules.iloc[i]['itemset'])]) 
+            results = pd.DataFrame([rules.iloc[i] for i in range(len(rules)) if bag_of_movies <= set(rules.iloc[i][destination])]) 
             print_df(results)
             
         elif command_type == "s":
@@ -176,8 +176,8 @@ def presentation_menu(rules, movies_df):
             # Show a particular rule
             
             rule_id = int(opt_list[1])
-            result = rules.loc[rules['rule_id'] == rule_id]
-            print(result)
+            result = rules.loc[rules['rule ID'] == rule_id]
+            print_df(result)
             
         elif command_type == "m":
 
