@@ -1,3 +1,8 @@
+##############################
+#                            #
+#  PANTELIDIS NIKOS AM 2787  #
+#                            #
+##############################
 from pair_finder import TriangularMatrixOfPairsCounters, HashCountersOfPairs
 from loader import ReadMovies, CreateMovieBaskets
 import time
@@ -12,7 +17,7 @@ user_baskets = CreateMovieBaskets(ratings_path,MinScore)
 movies_df = ReadMovies(movies_path)
 
 
-start_time = time.time()
+'''start_time = time.time()
 
 triangular_matrix = TriangularMatrixOfPairsCounters(movies_df, user_baskets)
 
@@ -24,7 +29,7 @@ for i in triangular_matrix:
     if i != 0:
         count += i
 
-print("TM PAIRS:",count)
+print("TM PAIRS:",count)'''
 
 start_time = time.time()
 
@@ -38,4 +43,3 @@ for i in hash_pair_counters.keys():
     count += hash_pair_counters[i]
 
 print("HASH PAIRS:", count)
-x = input("e")

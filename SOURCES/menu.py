@@ -1,3 +1,8 @@
+##############################
+#                            #
+#  PANTELIDIS NIKOS AM 2787  #
+#                            #
+##############################
 import os
 from loader import *
 from pair_finder import *
@@ -25,8 +30,12 @@ def print_presentation_commands():
 
 
 def loading_menu():
-    options = ['1', '2', '3']
-    print_loading_options()
+    files_dict = {
+        '1': 'Data\\ratings.csv',
+        '2': 'Data\\ratings_100users.csv',
+        '3': 'Data\\ratings_100user_shuffled.csv',
+        }
+    print_loading_options(files_dict)
     selected_option = input()
     
     print("Give a Min-Score(0,5):")
@@ -35,30 +44,24 @@ def loading_menu():
         print("Please give a number that is inside the given range (0,5):")
         min_score = input()
     
-    return apply_option(selected_option, min_score)
+    return apply_option(selected_option, files_dict, min_score)
     
 
 
-def print_loading_options():
+def print_loading_options(files_dict):
     print('==========LOADING OPTIONS==========\n')
-    print('(1)   Load ratings.csv\n')
-    print('(2)   Load ratings_100users.csv\n')
-    print('(3)   Load ratings_100user_shuffled.csv')
+    for i in files_dict.keys():
+        print(f'({i})   {files_dict[i][5:]}\n')
+
     print('(This option is used in sampled apriori. It returns a stream of the ratings)\n')
 
 
-def apply_option(loading_option, min_score):
-    if loading_option == '1':
-        ratings_path = "DATA\\ratings.csv"
-        return CreateMovieBaskets(ratings_path, min_score)
-
-    elif loading_option == '2':
-        ratings_path = "DATA\\ratings_100users.csv"
-        return CreateMovieBaskets(ratings_path, min_score)
+def apply_option(loading_option, files_dict, min_score):
+    if loading_option == '1' or loading_option == '2':
+        return CreateMovieBaskets(files_dict[loading_option], min_score)
 
     elif loading_option == '3':
-        ratings_path = "DATA\\ratings_100users_shuffled.csv"
-        return createRatingsStream(ratings_path, min_score)
+        return createRatingsStream(files_dict[loading_option], min_score)
 
     else:
         print("Somethong went wrong please try again.")

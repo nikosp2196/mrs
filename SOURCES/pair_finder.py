@@ -1,3 +1,8 @@
+##############################
+#                            #
+#  PANTELIDIS NIKOS AM 2787  #
+#                            #
+##############################
 import time
 import keyboard
 from random import seed
